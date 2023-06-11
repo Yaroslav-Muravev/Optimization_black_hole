@@ -21,3 +21,6 @@ Program structure:
  This file reads a table of pressure coefficient values at a certain point
  - Export_3D.m
  This file implements the receipt of a 3D structure in the form of a .mph file for its further printing
+ - Auxiliary functions are also present (corresponding folder)
+
+The details of each part of the program are described in files before the code.
