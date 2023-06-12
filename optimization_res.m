@@ -12,18 +12,19 @@ addpath '/home/yaroslav/Рабочий стол/matlab_kras/Optimization_black_h
 initial_gen = Create_initial_gen();
 cur_gen = initial_gen;
 
-for loop = 1:1
+P = [];
+F = [];
+F_abs = [];
+% Оценка стоимости каждой хромосомы
+for i = 1:10
+    F(end+1) = Cost_func(cur_gen(i,:));
+    Clear_all();
+    F_abs(end+1) = abs(F(end));
+    disp(F(i))
+end
+
+for loop = 1:10
     %% Рулетка
-    P = [];
-    F = [];
-    F_abs = [];
-    % Оценка стоимости каждой хромосомы
-    for i = 1:10
-        F(end+1) = Cost_func(cur_gen(i,:));
-        Clear_all();
-        F_abs(end+1) = abs(F(end));
-        disp(i)
-    end
     % Сопоставлние вероятности выпадания с каждой хромосомой
     P = P_calc(F, F_abs);
     res_ruletka = Ruletka(P, cur_gen, 10);
@@ -53,10 +54,12 @@ for loop = 1:1
         x = keys_sort(1);
         x_1 = x{1};
         y = [y; all(str2num(x_1),:)];
+        F(i) = values_sort(i);
+        F_abs(i) = abs(F(i));
     end
     cur_gen = y;
-    cur_gen(1,:) = initial_gen(1,:);
 end
 %% Генерация mph модели и данных для графика
+disp(cur_gen(1,:))
 Get_res_table(cur_gen(1,:));
 Export_3D(cur_gen(1,:))

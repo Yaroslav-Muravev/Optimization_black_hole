@@ -11,7 +11,7 @@ function Get_res_table(res_param)
     x4 = res_param{5};
     x5 = res_param{6};
     x6 = res_param{7};
-    x7 = 0.001;
+    x7 = res_param{8};
         
     %% Initialization of the model
     import com.comsol.model.*
