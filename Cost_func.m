@@ -32,9 +32,9 @@ function F = Cost_func(cur_item)
     r_domains = [];
     for r_ind = 1:18
         if rings(r_ind) == 1
+            r_name = 'r' + string(r_ind + 1);  
             r_pos = x1*(r_ind + x2) + (r_ind + x3)*r_ind*x4;
             r_size = r_pos*x5;
-
             r_sizes(end + 1) = r_size;
             r_poses(end + 1) = r_pos;
         else
@@ -44,6 +44,9 @@ function F = Cost_func(cur_item)
     end
 
     koeff = 240/max(r_poses);
+    if koeff > 115/max(r_sizes)
+        koeff = 115/max(r_sizes);
+    end
 
     for r_ind = 1:18
         if rings(r_ind) == 1
@@ -56,11 +59,9 @@ function F = Cost_func(cur_item)
         end
     end
 
-    maximum_index = find(r_poses == max(r_poses));
-
     % Tube
     tube_air = geom1.create('tube_air', 'Rectangle');
-    tube_air.set('size', [0.001*(1.2*max(r_sizes) + x7)*koeff koeff*(600 + r_poses(maximum_index))*0.001]);
+    tube_air.set('size', [koeff*0.001*(max(r_sizes) + x7 + 2) 60*0.001 + koeff*(max(r_poses))*0.001]);
     tube_air.set('pos', {'0' '-20 [mm]'});
     tube_air.set('createselection', 'on');
     geom1.run;
@@ -68,7 +69,7 @@ function F = Cost_func(cur_item)
     
     % PML: bottom
     pml_down = geom1.create('pml_down', 'Rectangle');
-    pml_down.set('size', [0.001*(1.2*max(r_sizes) + x7)*koeff 0.1]);
+    pml_down.set('size', [koeff*0.001*(max(r_sizes) + x7 + 2) 0.1]);
     pml_down.set('pos', {'0' '-120 [mm]'});
     pml_down.set('createselection', 'on');
     geom1.run;
@@ -76,18 +77,19 @@ function F = Cost_func(cur_item)
     
     % PML: top
     pml_up = geom1.create('pml_up', 'Rectangle');
-    pml_up.set('size', [0.001*(1.2*max(r_sizes) + x7)*koeff 0.1]);
-    pml_up.set('pos', [0 -0.02 + (600 + r_poses(maximum_index))*koeff*0.001]);
+    pml_up.set('size', [koeff*0.001*(max(r_sizes) + x7 + 2) 0.1]);
+    pml_up.set('pos', [0 40*0.001 + koeff*((max(r_poses))*0.001)]);
     pml_up.set('createselection', 'on');
     geom1.run;
     
     r1 = geom1.create('r1', 'Rectangle');
-    r1.set('size', [x7*0.001*koeff koeff*(r_poses(maximum_index) + x6)*0.001]);
+    r1.set('size', [x7*0.001*koeff koeff*(max(r_poses) + x6)*0.001]);
     r1.set('pos', [0 0]);
     r1.set('createselection', 'on');
     
     
     geom1.run;
+    
     %% Create selections
     % PML
     pml_up_domain_ent = mphgetselection(model.selection('geom1_pml_up_dom'));
@@ -173,24 +175,12 @@ function F = Cost_func(cur_item)
     
     
     %% Sampling points
-    point_before_structure_x = 0.0575;
-    point_before_structure_y = 0;
-    point_before_structure = geom1.create('point_before_structure', 'Point');
-    point_before_structure.set('p', [point_before_structure_x; point_before_structure_y]);
-    geom1.run('point_before_structure');
-    
-    point_in_structure_x = 0.0575;
-    point_in_structure_y = 0.200;
-    point_in_structure = geom1.create('point_in_structure', 'Point');
-    point_in_structure.set('p', [point_in_structure_x; point_in_structure_y]);
-    geom1.run('point_in_structure');
-    
+   
     point_after_structure_x = koeff*0.0005*(max(r_sizes) + x7 + 2);
-    point_after_structure_y = koeff*(r_poses(maximum_index) + 300)*0.001;
+    point_after_structure_y = koeff*(max(r_poses) + 10)*0.001;
     point_after_structure = geom1.create('point_after_structure', 'Point');
     point_after_structure.set('p', [point_after_structure_x; point_after_structure_y]);
     geom1.run('point_after_structure');
-    mphsave('plack')
     
     %% Mesh
     freq_start = 100;
@@ -257,5 +247,4 @@ function F = Cost_func(cur_item)
     freq0 = mphglobal(model, {'acpr.freq'});
     x = mean(p_dB, 1);
     F = x(1);
-    
 end
